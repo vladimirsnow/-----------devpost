@@ -2,7 +2,9 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper functions
+    // =========================================================================
+    // HELPER FUNCTIONS
+    // =========================================================================
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -11,34 +13,55 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // User profile and private game progression
+    // Leaderboard document schema & bounds validator
+    function isValidLeaderboardData(userId) {
+      let data = request.resource.data;
+      return data.uid == userId
+        && data.username is string && data.username.size() >= 1 && data.username.size() <= 40
+        && data.avatar is string && data.avatar.size() <= 300
+        && data.level is number && data.level >= 1 && data.level <= 100
+        && data.tier is string && data.tier.size() <= 40
+        && data.currentXp is number && data.currentXp >= 0 && data.currentXp <= 1000000
+        && data.clearedQuests is number && data.clearedQuests >= 0 && data.clearedQuests <= 100
+        && data.streakDays is number && data.streakDays >= 0 && data.streakDays <= 3650
+        && data.rankTitle is string && data.rankTitle.size() <= 50;
+    }
+
+    // =========================================================================
+    // USER DATA PRIVACY (Strict Owner-Only Access)
+    // =========================================================================
+    // A user can ONLY read and write their own document. Cross-user reading is DENIED.
     match /users/{userId} {
-      // Any authenticated user can read minimal profile details, owner can read full
-      allow read: if isAuthenticated();
-      // Only the user themselves can write/update their stats and progression
+      allow read: if isOwner(userId);
       allow write: if isOwner(userId);
       
-      // Sub-collections: progress, achievements, skills
+      // Sub-collections (progress, achievements, skills) are strictly owner-only
       match /{allSubcollections=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
-    // Global Public Leaderboard (Read by anyone, write only by the owner of the rank entry)
+    // =========================================================================
+    // GLOBAL PUBLIC LEADERBOARD (Public Read, Owner-Only Validated Write)
+    // =========================================================================
+    // Publicly readable for rankings. Writes strictly restricted to owner with schema validation.
     match /leaderboard/{userId} {
       allow read: if true;
-      allow write: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidLeaderboardData(userId);
+      allow delete: if isOwner(userId);
     }
 
-    // Static Quests & Bosses reference data
+    // =========================================================================
+    // STATIC REFERENCE COLLECTIONS (Read-Only for all users)
+    // =========================================================================
     match /quests/{questId} {
       allow read: if true;
-      allow write: if false; // Read-only for players
+      allow write: if false;
     }
 
     match /bosses/{bossId} {
       allow read: if true;
-      allow write: if false; // Read-only for players
+      allow write: if false;
     }
   }
 }

@@ -126,11 +126,28 @@ npm run build
 
 ---
 
-## 🔒 Security & Best Practices
+## 🔒 Security Architecture & Firestore Rules
 
-- **Zero API Key Leaks**: Secret AI keys (`GEMINI_API_KEY`) are processed via serverless endpoints (`/api/ai-mentor.js`).
-- **Sandboxed Execution**: Code runs in isolated frames with captured console buffers, preventing prototype pollution or unauthorized storage access.
-- **Granular Firestore Rules**: User documents and progression can only be written by authenticated owners.
+DevQuest implements a multi-layer security model designed for client-safe operation without exposing backend admin credentials:
+
+### 1. User Data Isolation (`/users/{userId}`)
+- **Strict Owner-Only Access**: A user can **only read and write their own document** (`request.auth.uid == userId`).
+- Cross-user reads are explicitly **DENIED** (`allow read: if isOwner(userId)`).
+- Subcollections (`progress`, `achievements`, `skills`) inherit strict owner-only access.
+
+### 2. Leaderboard Integrity & Validation (`/leaderboard/{userId}`)
+- **Public Read Access**: The leaderboard collection is globally readable so all players can view the ranking ladder.
+- **Strict Owner Write + Schema Validation**: Users can only create or update their own leaderboard document matching their authenticated UID (`isOwner(userId)`).
+- **Enforced Field Constraints**: Firestore rules validate that:
+  - `uid` strictly matches the authenticated user ID (`data.uid == userId`).
+  - `username`, `tier`, `rankTitle`, and `avatar` are valid strings within strict length bounds (1-40 chars).
+  - `currentXp`, `level`, `clearedQuests`, and `streakDays` are positive numeric values within valid progression ranges (`currentXp >= 0 && currentXp <= 1000000`, `level >= 1 && level <= 100`).
+
+### 3. Serverless AI Protection
+- **Zero Client Key Leakage**: Secret `GEMINI_API_KEY` is hosted strictly in server-side environment variables on Vercel and accessed via the serverless function `/api/ai-mentor.js`.
+
+### 4. Architectural Note on Progression & Trust Model
+> **Hackathon Trust Model Disclosure:** In this architecture, quest test assertions run client-side in an isolated sandbox for zero-latency instant feedback. While Firestore security rules strictly prevent UID spoofing, cross-user tampering, and malformed database injection, true backend-authoritative progression would require a remote server-side code execution container (e.g. isolated Docker runner). For the scope of this hackathon, Firestore schema validation + UID ownership provides the optimal balance of high performance, security, and simplicity.
 
 ---
 

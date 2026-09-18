@@ -74,9 +74,23 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Профиль и игровой прогресс пользователя
+    // Валидатор схемы и допустимых диапазонов для лидерборда
+    function isValidLeaderboardData(userId) {
+      let data = request.resource.data;
+      return data.uid == userId
+        && data.username is string && data.username.size() >= 1 && data.username.size() <= 40
+        && data.avatar is string && data.avatar.size() <= 300
+        && data.level is number && data.level >= 1 && data.level <= 100
+        && data.tier is string && data.tier.size() <= 40
+        && data.currentXp is number && data.currentXp >= 0 && data.currentXp <= 1000000
+        && data.clearedQuests is number && data.clearedQuests >= 0 && data.clearedQuests <= 100
+        && data.streakDays is number && data.streakDays >= 0 && data.streakDays <= 3650
+        && data.rankTitle is string && data.rankTitle.size() <= 50;
+    }
+
+    // Профиль и игровой прогресс пользователя (СТРОГО ТОЛЬКО ВЛАДЕЛЕЦ)
     match /users/{userId} {
-      allow read: if isAuthenticated();
+      allow read: if isOwner(userId);
       allow write: if isOwner(userId);
       
       match /{allSubcollections=**} {
@@ -84,10 +98,11 @@ service cloud.firestore {
       }
     }
 
-    // Публичный лидерборд (чтение доступно всем, запись — только своему аккаунту)
+    // Публичный лидерборд (чтение доступно всем, запись — только своему аккаунту с проверкой схемы)
     match /leaderboard/{userId} {
       allow read: if true;
-      allow write: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidLeaderboardData(userId);
+      allow delete: if isOwner(userId);
     }
 
     // Статические коллекции квестов и боссов
