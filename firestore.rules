@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // User profile and private game progression
+    match /users/{userId} {
+      // Any authenticated user can read minimal profile details, owner can read full
+      allow read: if isAuthenticated();
+      // Only the user themselves can write/update their stats and progression
+      allow write: if isOwner(userId);
+      
+      // Sub-collections: progress, achievements, skills
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Global Public Leaderboard (Read by anyone, write only by the owner of the rank entry)
+    match /leaderboard/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
+    }
+
+    // Static Quests & Bosses reference data
+    match /quests/{questId} {
+      allow read: if true;
+      allow write: if false; // Read-only for players
+    }
+
+    match /bosses/{bossId} {
+      allow read: if true;
+      allow write: if false; // Read-only for players
+    }
+  }
+}

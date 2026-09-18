@@ -1,0 +1,6 @@
+{
+  "name": "DevQuest",
+  "description": "Cyberpunk RPG IDE and gamified coding platform with interactive quests, world map, challenge studio, and boss raids.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
