@@ -1,31 +1,34 @@
-# DEVQUEST // MANUAL SETUP & DEPLOYMENT MANUAL
+# 🛠 DEVQUEST — ПОЛНОЕ РУКОВОДСТВО ПО РУЧНОЙ НАСТРОЙКЕ И ДЕПЛОЮ (MANUAL SETUP)
 
-This document contains step-by-step instructions for every service required by **DevQuest** that requires your personal credentials, external account authorizations, or manual web portal actions.
+Данный документ содержит **исчерпывающие пошаговые инструкции** для всех сервисов и внешних аккаунтов, которые требуются для работы **DevQuest** и которые физически требуют твоей авторизации (Firebase, Google AI Studio, GitHub, Vercel, Devpost).
 
-> **Zero-Config Notice:** DevQuest includes an automated local fallback and demo sandbox. You can run `npm run dev` right away to explore all quests, boss raids, AI hints, and leaderboards even before configuring external credentials.
-
----
-
-## 1. Firebase Configuration
-
-### Step 1.1: Create a Firebase Project
-1. Open the [Firebase Console](https://console.firebase.google.com/).
-2. Click **"Add project"** (or **"Create a project"**).
-3. Enter Project Name: `devquest-hackathon` (or your preferred name).
-4. (Optional) Disable Google Analytics or keep default, then click **"Create project"**.
-5. Wait for the project creation to complete and click **"Continue"**.
+> 💡 **Режим мгновенного демо (Zero-Config):**
+> В DevQuest уже встроен локальный демо-режим. Приложение можно запустить прямо сейчас командой `npm run dev` — все 10 квестов, 3 Boss-рейда, подсказки AI и лидерборд будут работать локально даже до ввода ключей.
 
 ---
 
-### Step 1.2: Register a Web Application
-1. On the Project Overview page, click the **Web icon (`</>`)** under *"Get started by adding Firebase to your app"*.
-2. Enter App nickname: `DevQuest Web`.
-3. (Optional) Check *"Also set up Firebase Hosting for this app"*.
-4. Click **"Register app"**.
-5. Firebase will display your `firebaseConfig` object. Copy the values into your local `.env.local` file:
+## 1. Настройка Firebase
+
+### Шаг 1.1: Создание проекта в Firebase
+1. Перейди в [Firebase Console](https://console.firebase.google.com/).
+2. Нажми кнопку **"Add project"** (или **"Создать проект"**).
+3. В поле **Project name** введи имя проекта: `devquest-hackathon` (или любое другое).
+4. Нажми **"Continue"** ("Продолжить").
+5. На шаге Google Analytics можно оставить включенным или выключить (для хакатона не имеет значения). Нажми **"Create project"** ("Создать проект").
+6. Дождись завершения инициализации и нажми **"Continue"**.
+
+---
+
+### Шаг 1.2: Регистрация веб-приложения (Web App)
+1. На главной странице проекта (Project Overview) нажми на иконку веб-приложения: **`</>`** (под надписью *"Get started by adding Firebase to your app"*).
+2. В поле **App nickname** введи: `DevQuest Web`.
+3. Галочку *"Also set up Firebase Hosting"* можно не ставить (мы деплоим на Vercel).
+4. Нажми **"Register app"** ("Зарегистрировать приложение").
+5. Firebase покажет объект конфигурации `firebaseConfig`. Скопируй значения параметров.
+6. В корне проекта создай файл `.env.local` (на основе `.env.example`) и вставь скопированные значения:
 
 ```env
-VITE_FIREBASE_API_KEY=AIzaSy...
+VITE_FIREBASE_API_KEY=AIzaSyТвойКлючЗдесь
 VITE_FIREBASE_AUTH_DOMAIN=devquest-hackathon.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=devquest-hackathon
 VITE_FIREBASE_STORAGE_BUCKET=devquest-hackathon.appspot.com
@@ -35,28 +38,28 @@ VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef123456
 
 ---
 
-### Step 1.3: Enable Firebase Authentication
-1. In the Firebase Console left sidebar, click **"Build"** → **"Authentication"**.
-2. Click **"Get started"**.
-3. Under the **"Sign-in method"** tab, click **"Email/Password"**.
-4. Toggle **"Enable"** (the first toggle).
-5. (Optional) Leave "Email link (passwordless sign-in)" disabled.
-6. Click **"Save"**.
+### Шаг 1.3: Включение аутентификации (Firebase Authentication)
+1. В левом боковом меню консоли Firebase перейди в раздел **"Build"** → **"Authentication"**.
+2. Нажми кнопку **"Get started"** ("Начать").
+3. Во вкладке **"Sign-in method"** выбери провайдера **"Email/Password"**.
+4. Включи первый переключатель: **"Enable"** ("Включено").
+5. Второй переключатель (*Email link / passwordless*) оставь выключенным.
+6. Нажми кнопку **"Save"** ("Сохранить").
 
 ---
 
-### Step 1.4: Create Cloud Firestore Database
-1. In the left sidebar, click **"Build"** → **"Firestore Database"**.
-2. Click **"Create database"**.
-3. Choose a Database location close to your region (e.g., `nam5 (us-central)` or `eur3 (europe-west)`).
-4. Select **"Start in production mode"** (we provide custom security rules).
-5. Click **"Create"**.
+### Шаг 1.4: Создание базы данных Cloud Firestore
+1. В левом боковом меню перейди в раздел **"Build"** → **"Firestore Database"**.
+2. Нажми **"Create database"** ("Создать базу данных").
+3. Выбери ближайший к тебе регион расположения базы данных (например, `nam5 (us-central)` или `eur3 (europe-west)`).
+4. Выбери режим безопасности: **"Start in production mode"** ("В режиме продакшена").
+5. Нажми **"Create"** ("Создать").
 
 ---
 
-### Step 1.5: Apply Firestore Security Rules
-1. In the Firestore Database dashboard, click the **"Rules"** tab.
-2. Replace all existing text with the content from the [firestore.rules](file:///c:/Users/vladimirsnov/Desktop/проект%20для%20devpost/firestore.rules) file in this repository:
+### Шаг 1.5: Установка правил безопасности (Firestore Security Rules)
+1. На странице созданной базы данных Firestore нажми на вкладку **"Rules"** ("Правила").
+2. Полностью замени всё содержимое редактора правил на следующий код (он также сохранён в файле `firestore.rules` проекта):
 
 ```javascript
 rules_version = '2';
@@ -71,6 +74,7 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Профиль и игровой прогресс пользователя
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId);
@@ -80,11 +84,13 @@ service cloud.firestore {
       }
     }
 
+    // Публичный лидерборд (чтение доступно всем, запись — только своему аккаунту)
     match /leaderboard/{userId} {
       allow read: if true;
       allow write: if isOwner(userId);
     }
 
+    // Статические коллекции квестов и боссов
     match /quests/{questId} {
       allow read: if true;
       allow write: if false;
@@ -97,89 +103,105 @@ service cloud.firestore {
   }
 }
 ```
-3. Click **"Publish"**.
+3. Нажми кнопку **"Publish"** ("Опубликовать").
 
 ---
 
-## 2. AI Mentor Setup (Google Gemini API)
+## 2. Настройка AI Mentor (Google Gemini API)
 
-### Step 2.1: Obtain API Key from Google AI Studio
-1. Navigate to [Google AI Studio](https://aistudio.google.com/app/apikey).
-2. Sign in with your Google account.
-3. Click **"Create API key"** (or **"Get API key"**).
-4. Select your Google Cloud Project or create a new one.
-5. Copy the generated API key (format: `AIzaSy...`).
+AI-наставник **Syrus** работает через serverless-функцию `/api/ai-mentor.js`, используя официальный SDK `@google/genai`. Ключ API защищён и никогда не передаётся в клиентский браузер.
 
-### Step 2.2: Add Key to Server Environment
-- In local development: Add to `.env.local`:
+### Шаг 2.1: Получение бесплатного API-ключа Gemini
+1. Перейди на портал [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Авторизуйся под своим Google-аккаунтом.
+3. Нажми кнопку **"Create API key"** ("Создать ключ API").
+4. Выбери Google Cloud проект или подтверди создание нового.
+5. Скопируй полученный ключ (он начинается с `AIzaSy...`).
+
+### Шаг 2.2: Добавление ключа в проект
+- **Для локальной разработки:** Добавь ключ в файл `.env.local`:
   ```env
-  GEMINI_API_KEY=AIzaSyYourGeneratedGeminiKey
+  GEMINI_API_KEY=AIzaSyТвойСгенерированныйКлюч
   ```
-- In Vercel: Add `GEMINI_API_KEY` under **Project Settings → Environment Variables**.
-
-> **Security Note:** DevQuest uses server-side routing via `api/ai-mentor.js` so your `GEMINI_API_KEY` is never leaked to the client browser.
+- **Для Vercel:** Добавь переменную `GEMINI_API_KEY` в настройках проекта на Vercel (Project Settings → Environment Variables).
 
 ---
 
-## 3. GitHub Repository Setup
+## 3. Публикация в GitHub
 
-### Step 3.1: Initialize & Push Code
-1. Open your terminal in this project folder.
-2. Verify git status and commit all files:
-   ```bash
-   git add .
-   git commit -m "feat: complete DevQuest hackathon platform with Firebase & AI mentor"
-   ```
-3. Create a new repository on [GitHub](https://github.com/new) named `devquest`.
-4. Link and push to your remote:
-   ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/devquest.git
-   git branch -M main
-   git push -u origin main
-   ```
+### Шаг 3.1: Создание репозитория на GitHub
+1. Зайди на [GitHub](https://github.com/new).
+2. Введи имя репозитория: `devquest`.
+3. Выбери **Public** (публичный).
+4. **Не добавляй** README, .gitignore или лицензию (они уже созданы в проекте).
+5. Нажми **"Create repository"**.
 
----
+### Шаг 3.2: Отправка кода в репозиторий
+Открой терминал в папке проекта и выполни команды (замени `YOUR_USERNAME` на свой логин GitHub):
 
-## 4. Vercel Production Deployment
-
-### Step 4.1: Import Project
-1. Log in to [Vercel](https://vercel.com/).
-2. Click **"Add New..."** → **"Project"**.
-3. Select your `devquest` GitHub repository and click **"Import"**.
-
-### Step 4.2: Set Environment Variables
-Under the **"Environment Variables"** section in the Vercel import screen, add:
-
-| Name | Value |
-|---|---|
-| `VITE_FIREBASE_API_KEY` | `AIzaSy...` |
-| `VITE_FIREBASE_AUTH_DOMAIN` | `devquest-hackathon.firebaseapp.com` |
-| `VITE_FIREBASE_PROJECT_ID` | `devquest-hackathon` |
-| `VITE_FIREBASE_STORAGE_BUCKET` | `devquest-hackathon.appspot.com` |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `123456789012` |
-| `VITE_FIREBASE_APP_ID` | `1:123456789012:web:abcdef123456` |
-| `GEMINI_API_KEY` | `AIzaSy...` |
-
-### Step 4.3: Deploy & Verify
-1. Click **"Deploy"**.
-2. Once the build finishes, click **"Visit"** to test your live production deployment.
+```bash
+git remote add origin https://github.com/YOUR_USERNAME/devquest.git
+git branch -M main
+git push -u origin main
+```
 
 ---
 
-## 5. Devpost Submission Guide
+## 4. Деплой на Vercel
 
-When submitting DevQuest on Devpost, use the following structured information:
+### Шаг 4.1: Импорт репозитория
+1. Войди в свой аккаунт на [Vercel](https://vercel.com/).
+2. Нажми **"Add New..."** → **"Project"**.
+3. Найди в списке репозиторий `devquest` и нажми кнопку **"Import"**.
 
-- **Project Title:** `DevQuest`
+### Шаг 4.2: Настройка Environment Variables
+В блоке **"Environment Variables"** добавь переменные:
+
+| Имя переменной | Значение | Описание |
+|---|---|---|
+| `VITE_FIREBASE_API_KEY` | `AIzaSy...` | API Key из Firebase Web App |
+| `VITE_FIREBASE_AUTH_DOMAIN` | `devquest-hackathon.firebaseapp.com` | Auth Domain Firebase |
+| `VITE_FIREBASE_PROJECT_ID` | `devquest-hackathon` | ID проекта Firebase |
+| `VITE_FIREBASE_STORAGE_BUCKET` | `devquest-hackathon.appspot.com` | Storage Bucket Firebase |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | `123456789012` | Sender ID Firebase |
+| `VITE_FIREBASE_APP_ID` | `1:123456789012:web:abcdef123456` | App ID Firebase |
+| `GEMINI_API_KEY` | `AIzaSy...` | Ключ Gemini API для AI-ментора |
+
+### Шаг 4.3: Запуск деплоя
+1. Нажми кнопку **"Deploy"**.
+2. Дождись завершения сборки (около 1 минуты).
+3. Нажми **"Continue to Dashboard"** и скопируй публичный URL приложения (например, `https://devquest-xxxx.vercel.app`).
+
+---
+
+## 5. Подготовка заявки на Devpost (Submission Guide)
+
+При отправке проекта на платформу Devpost используй следующую структуру:
+
+### 📌 Основные данные:
+- **Project Name:** `DevQuest`
 - **Tagline:** `Turn learning to code into an adventure.`
-- **Links to Include:**
-  - Live Demo URL (from Vercel)
-  - GitHub Repository URL
-  - Video Demo / Walkthrough link
-- **Inspiration:** Learning to code can be intimidating and tedious. We built DevQuest to turn programming into an immersive cyberpunk RPG where debugging feels like casting spells and defeating corrupted malware colossi.
-- **What It Does:**
-  - 10+ interactive JavaScript, CSS, and DOM coding quests with real sandbox execution.
-  - 3 Boss Raid challenges (Broken HTML, Broken CSS, Broken JavaScript) where players repair syntax bugs to deal damage.
-  - Syrus AI Neural Mentor with Socratic hints, error explanations, syntax patterns, and complete walkthroughs.
-  - Full Firebase Authentication and Cloud Firestore sync for profile XP, skill tree progression, achievements, and global leaderboard rankings.
-  - Web Audio synthesizer sound effects with full audio mute toggle.
+- **Live Demo URL:** `https://твой-домен.vercel.app`
+- **GitHub Repository:** `https://github.com/YOUR_USERNAME/devquest`
+
+### 📝 Текстовые блоки для Devpost:
+
+#### 💡 Inspiration (Вдохновение)
+> Традиционное обучение программированию часто кажется сухим, скучным и перегруженным сложной теорией. Мы хотели превратить процесс написания кода в захватывающее cyberpunk RPG приключение, где поиск багов ощущается как битва с боссами, а решение задач — как прокачка персонажа и открытие заклинаний.
+
+#### ⚙️ What it does (Что делает проект)
+> **DevQuest** — это полноценная геймифицированная IDE-платформа с живой песочницей:
+> 1. **10 интерактивных квестов:** от Hello World и стрелочных функций до манипуляций с DOM, асинхронного Fetch API и LocalStorage.
+> 2. **3 Boss Raid испытания:** исправление сломанного HTML (Malware Titan), сломанного CSS с бесконечным оверфлоу (CSS Glitch Fiend) и критических ошибок JavaScript (Null Pointer Dragon). Каждое исправление в коде наносит реальный урон боссу!
+> 3. **AI-наставник Syrus:** умный копайлот на базе Google Gemini, который обучает по методу Сократа (подсказки, разбор ошибок, архитектурные паттерны и пошаговые решения).
+> 4. **Прокачка и Лидерборд:** система уровней, дерево навыков, автоматические достижения (Medal Deck) и синхронизация рейтинга в Cloud Firestore.
+> 5. **Cyberpunk Audio:** динамические синтезированные звуковые эффекты на Web Audio API.
+
+#### 🛠 How we built it (Как мы это создали)
+> - **Frontend:** React 19, Vite, Tailwind CSS, Space Grotesk / Space Mono typography, HTML5 Canvas.
+> - **Sandbox Engine:** изолированная песочница для безопасного выполнения пользовательского кода и проверки критериев тестов.
+> - **Backend & Database:** Firebase Authentication (Email/Password), Cloud Firestore с правилами безопасности.
+> - **AI Integration:** Google Gemini API (`@google/genai`) через безопасный serverless-эндпоинт `/api/ai-mentor.js`.
+
+#### 🤖 AI Disclosure (Раскрытие использования AI)
+> Google Gemini API используется внутри приложения для работы AI-наставника Syrus, анализируя код пользователя и давая контекстные педагогические подсказки.
